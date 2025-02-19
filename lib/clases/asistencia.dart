@@ -8,5 +8,6 @@ class Asistencia{
   bool sync=false;
   String fechaHoraUTCsync='';
   Horario? horario; 
+  String idAsistencia='';
 
 }

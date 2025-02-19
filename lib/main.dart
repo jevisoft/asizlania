@@ -1,5 +1,8 @@
+import 'package:asiz/pantallas/PantallaChecar.dart';
 import 'package:flutter/material.dart';
 import 'pantallas/principal.dart';
+import 'pantallas/PantallaVincular.dart';
+import 'pantallas/PantallaAsistencias.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -8,8 +11,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AsiZ',
-      home: PantallaPrincipal(),
+      debugShowCheckedModeBanner: false,
+      title: 'AsiZ',      
+      initialRoute: '/',
+      routes:{
+        '/':(context)=>PantallaPrincipal(),
+        '/asistencias':(context)=>PantallaAsistencias(),
+        '/checar':(context)=>PantallaChecar(),
+        '/vincular':(context)=>PantallaVincular()
+      }
     );
   }
 }
