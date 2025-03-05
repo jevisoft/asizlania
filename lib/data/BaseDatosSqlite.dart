@@ -5,15 +5,29 @@ class BaseDatosSqlite{
    
    Future<Database> getBaseDatos() async{
       String pathBaseDatos=await getDatabasesPath();
-      String path=join(pathBaseDatos,'asizbd.db');
+      String path=join(pathBaseDatos,'asizbd1.db');
 
       return await openDatabase(path,version: 1,
-      onCreate:_onCrearBaseDatos );
+      onCreate:_onCrearBaseDatos,
+      onUpgrade: _onUpgrade);
 
    }
 
    void _onCrearBaseDatos(Database db, int version) async{
-      await db.execute('''
+      var batch=db.batch();
+      creaTablas(batch);
+      await batch.commit();
+   }
+
+   void _onUpgrade(Database db, int version,int oldVersion) async{
+    var batch=db.batch();
+      eliminaTablas(batch);
+      creaTablas(batch);
+      await batch.commit();
+   }
+
+  void creaTablas(Batch batch){
+batch.execute('''
         CREATE TABLE trabajador(
           id_empleado INTEGER,
           nombre TEXT,
@@ -25,14 +39,14 @@ class BaseDatosSqlite{
           empresa TEXT,
           puesto TEXT)
       ''');
-      await db.execute('''
+      batch.execute('''
         CREATE TABLE horario(
           id_horario INTEGER,
           horario_desc TEXT,
           hora_entrada TEXT)
       ''');
 
-      await db.execute('''
+      batch.execute('''
         CREATE TABLE centros_trabajo(
           id_centro INTEGER,
           centro_trabajo TEXT,
@@ -43,7 +57,7 @@ class BaseDatosSqlite{
           es_principal INTEGER)
       ''');
 
-      await db.execute('''
+      batch.execute('''
         CREATE TABLE asistencias(
           id_centro INTEGER,
           fecha_hora_utc TEXT,
@@ -53,7 +67,22 @@ class BaseDatosSqlite{
           id_horario INTEGER,
           id_asistencia TEXT)
       ''');
+
+      batch.execute('''
+        CREATE TABLE dispositivo(
+          id_dispositivo INTEGER,
+          codigo_vinculacion TEXT)
+      ''');
    }
+
+   void eliminaTablas(Batch batch){
+     batch.execute("DROP TABLE IF EXISTS trabajador");
+     batch.execute("DROP TABLE IF EXISTS horario");
+     batch.execute("DROP TABLE IF EXISTS centros_trabajo");
+     batch.execute("DROP TABLE IF EXISTS asistencias");
+     batch.execute("DROP TABLE IF EXISTS dispositivo");
+   }
+  
 
    
 }

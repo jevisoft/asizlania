@@ -1,5 +1,6 @@
 import 'package:asiz/clases/asistencia.dart';
 import 'package:asiz/clases/centro_trabajo.dart';
+import 'package:asiz/clases/dispositivo.dart';
 import 'package:asiz/clases/horario.dart';
 import 'package:asiz/clases/trabajador.dart';
 import 'package:sqflite/sqflite.dart';
@@ -7,7 +8,32 @@ import 'BaseDatosSqlite.dart';
 
 class BaseDatosControlador {
 
-  Future<void> guardaTrabajador(Trabajador trabajador) async{
+  static Future<void> eliminaDatos() async{
+BaseDatosSqlite bd=BaseDatosSqlite();
+      final base=await bd.getBaseDatos();
+      Batch batch=base.batch();
+     batch.delete("trabajador");
+     batch.delete("horario");
+     batch.delete("centros_trabajo");
+     batch.delete("asistencias");
+     batch.delete('dispositivo');
+     
+     batch.commit();
+    await base.close();
+  }
+
+  static Future<void> guardaDispositivo(Dispositivo dispositivo) async{
+      BaseDatosSqlite bd=BaseDatosSqlite();
+      final base=await bd.getBaseDatos();     
+
+      await base.delete('dispositivo');
+      await base.insert('dispositivo', 
+        {'id_dispositivo':dispositivo.idDispositivo,
+        'codigo_vinculacion':dispositivo.codigoVinculacion});
+      await base.close();
+  }
+
+  static Future<void> guardaTrabajador(Trabajador trabajador) async{
       BaseDatosSqlite bd=BaseDatosSqlite();
       final base=await bd.getBaseDatos();
 
@@ -48,7 +74,7 @@ class BaseDatosControlador {
         await base.close();
   }
 
-  Future<Trabajador?> getTrabajador() async{
+  static Future<Trabajador?> getTrabajador() async{
       Trabajador? trabajador;
     BaseDatosSqlite bd=BaseDatosSqlite();
       final base=await bd.getBaseDatos();
