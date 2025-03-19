@@ -74,6 +74,27 @@ BaseDatosSqlite bd=BaseDatosSqlite();
         await base.close();
   }
 
+  static Future<Dispositivo?> getDispositivo() async{
+    
+
+    BaseDatosSqlite bd=BaseDatosSqlite();
+      final base=await bd.getBaseDatos();
+
+       List<Map> listDispositivo= await base.query('dispositivo');
+       if(listDispositivo.isEmpty){
+          await base.close();
+        return null;  
+       }
+
+       Dispositivo dispositivo=Dispositivo();
+       dispositivo.idDispositivo=listDispositivo[0]['id_dispositivo'];
+       dispositivo.codigoVinculacion=listDispositivo[0]['codigo_vinculacion'];
+
+      await base.close(); 
+
+    return dispositivo;
+  }
+
   static Future<Trabajador?> getTrabajador() async{
       Trabajador? trabajador;
     BaseDatosSqlite bd=BaseDatosSqlite();
@@ -128,7 +149,7 @@ BaseDatosSqlite bd=BaseDatosSqlite();
       return trabajador;
   }
 
-  Future<void> guardaAsistencia(Asistencia asistencia) async{
+  static Future<void> guardaAsistencia(Asistencia asistencia) async{
       BaseDatosSqlite bd=BaseDatosSqlite();
       final base=await bd.getBaseDatos();
 
@@ -147,15 +168,35 @@ BaseDatosSqlite bd=BaseDatosSqlite();
         await base.close();
   }
 
-  Future<List<Asistencia>> getAsistencias() async{
+  static Future<List<Asistencia>> getAsistencias() async{    
+   return await _getAsistenciasFromQuery('select * from asistencias left join horario using(id_horario) left join centros_trabajo using(id_centro)');
+  }
+
+  static Future<List<Asistencia>> getAsistenciasNoSync() async{    
+   return await _getAsistenciasFromQuery('select * from asistencias left join horario using(id_horario) left join centros_trabajo using(id_centro) where sync=0');
+  }
+
+  static Future<List<Asistencia>> _getAsistenciasFromQuery(String query) async{
     List<Asistencia> lista=[];
       BaseDatosSqlite bd=BaseDatosSqlite();
       final base=await bd.getBaseDatos();
+      
+      List<Map> listaAsis= await base.rawQuery(query);
 
-      List<Map> listaAsis= await base.rawQuery('select * from asistencias left join horarios using(id_horario) left join centros_trabajo using(id_centro)');
+       listaAsis.forEach((lasis){          
+          lista.add(_MapToAsistencia(lasis));
+       });
 
-       listaAsis.forEach((lasis){
-          Asistencia asis=Asistencia();
+      await base.close();
+
+      return lista;
+
+  }
+
+
+  static _MapToAsistencia(Map<dynamic,dynamic> lasis){
+
+Asistencia asis=Asistencia();
           CentroTrabajo ctAsis=CentroTrabajo();
           Horario horarioAsis=Horario();
 
@@ -165,7 +206,8 @@ BaseDatosSqlite bd=BaseDatosSqlite();
 
           ctAsis.idCentro=lasis['id_centro'];
           ctAsis.centroTrabajo=lasis['centro_trabajo'];
-          ctAsis.esPrincipal=lasis['es_principal'];
+
+          ctAsis.esPrincipal=(lasis['es_principal']==1);
           ctAsis.idSucursal=lasis['id_sucursal'];
           ctAsis.sucursal=lasis['sucursal'];
           ctAsis.positionLat=lasis['posicion_latitud'];
@@ -179,21 +221,28 @@ BaseDatosSqlite bd=BaseDatosSqlite();
           asis.sync=(lasis['sync']==1);
           asis.idAsistencia=lasis['id_asistencia'];
 
-          lista.add(asis);
-       });
-
-
-      await base.close();
-
-      return lista;
+          return asis;
   }
 
-  Future<void> actualizaAsistenciaSync(Asistencia asistencia) async{
+  static Future<void> actualizaAsistenciaSync(Asistencia asistencia) async{
       BaseDatosSqlite bd=BaseDatosSqlite();
       final base=await bd.getBaseDatos();
              
       await base.rawUpdate('update asistencias set sync=1, fecha_hora_sync=\'${asistencia.fechaHoraUTCsync}\' where id_asistencia=\'${asistencia.idAsistencia}\'');
      
+      await base.close();
+  }
+
+  static Future<void> borraAsistencias(List<Asistencia> asistencias) async{
+    var cad="";
+    asistencias.forEach((asistencia){
+        cad+="'${asistencia.idAsistencia}',";
+    });
+    cad=cad.substring(0,cad.length-1);
+
+      BaseDatosSqlite bd=BaseDatosSqlite();
+      final base=await bd.getBaseDatos();             
+      await base.execute("delete from asistencias where id_asistencia in ($cad)");     
       await base.close();
   }
 

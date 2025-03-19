@@ -1,5 +1,7 @@
 
 import 'package:asiz/api/ApiCas.dart';
+import 'package:asiz/api/ApiCasHelper.dart';
+import 'package:asiz/clases/asistencia.dart';
 import 'package:asiz/clases/asistencia_item.dart';
 import 'package:asiz/data/BaseDatosControlador.dart';
 import 'package:asiz/helpers/MensajesHelper.dart';
@@ -131,8 +133,9 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
         );    
   }
 
-  void desvincular() async{
-    
+  void desvincular() async{    
+
+   
 
     await BaseDatosControlador.eliminaDatos();
     
@@ -143,10 +146,9 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
 
 
   void prueba() async{
-      DateTime ahora=DateTime.now();
+     
+    await context.read<TrabajadorProvider>().sincronizaAsistencias();   
 
-      List<AsistenciaItem> lista=await AsistenciaItem.getAsistenciasUltimos30Dias(context.read<TrabajadorProvider>().trabajador);
-      Mensajeshelper.muestraMensajeOk(context, "Total: ${lista.length} ${ahora.toLocal().toString().substring(0,10)}");
 
     }
 

@@ -12,6 +12,7 @@ class AsistenciaItem {
   String registros="";
   String estatus="";
   String sucursal="";
+  
 
   static Future<List<AsistenciaItem>> getAsistenciasUltimos30Dias(Trabajador trabajador) async{
      List<AsistenciaItem> lista=[];
@@ -19,22 +20,24 @@ class AsistenciaItem {
      String del=ahora.toLocal().subtract(Duration(days: 30)).toString().substring(0,10);
      String al=ahora.toLocal().toString().substring(0,10);
 
-    /* var respuesta= await ApiCas.asistencias(Apicashelper.getConsultaAsistenciasDTO(del,al, trabajador));
+     var respuesta= await ApiCas.asistencias(Apicashelper.getConsultaAsistenciasDTO(del,al, trabajador));
      if(respuesta.statusCode!=200){
+      print("Error al obtener lista ${respuesta.statusCode}");
       return lista;
      }
-     Map<String,dynamic> json=jsonDecode(respuesta.body);*/
-     Map<String,dynamic> json=jsonDecode(Apihelpertest.getRespuestaAsistencias());
+     print("Se obtuvo respuesta");
+     Map<String,dynamic> json=jsonDecode(respuesta.body);
+    // Map<String,dynamic> json=jsonDecode(Apihelpertest.getRespuestaAsistencias());
 
-     List<dynamic> asistencias_json=json["asistencias"] as List<dynamic>;
+     List<dynamic> asistenciasJson=json["asistencias"] as List<dynamic>;
 
-     asistencias_json.forEach((asistencia_json){
-          AsistenciaItem asistencia_item=AsistenciaItem();
-          asistencia_item.fecha=asistencia_json["fecha"].toString();
-          asistencia_item.registros=asistencia_json["registros"].toString();
-          asistencia_item.estatus=asistencia_json["estatus"].toString();
-          asistencia_item.sucursal=asistencia_json["sucursal"].toString();
-          lista.add(asistencia_item);
+     asistenciasJson.forEach((asistenciaJson){
+          AsistenciaItem asistenciaItem=AsistenciaItem();
+          asistenciaItem.fecha=asistenciaJson["fecha"].toString();
+          asistenciaItem.registros=asistenciaJson["registros"].toString();
+          asistenciaItem.estatus=asistenciaJson["estatus"].toString();
+          asistenciaItem.sucursal=asistenciaJson["sucursal"].toString();
+          lista.add(asistenciaItem);
      });
 
 

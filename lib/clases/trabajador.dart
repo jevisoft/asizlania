@@ -1,5 +1,10 @@
+import 'package:asiz/clases/asistencia.dart';
+import 'package:asiz/geolocalizacion/gps_helper.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'centro_trabajo.dart';
 import 'horario.dart';
+import 'dispositivo.dart';
 
 class Trabajador{
   int idEmpleado=0;
@@ -17,6 +22,22 @@ class Trabajador{
   CentroTrabajo? getCentroTrabajoPrincipal(){
         return centrosDeTrabajo?.firstWhere((CentroTrabajo ct)=>ct.esPrincipal);
   }
+
+  Future<Asistencia> getAsistenciaFromPosicion(Position posicion,Dispositivo dispositivo,DateTime horaCheck) async{
+     Asistencia asistencia=Asistencia();
+     centrosDeTrabajo?.forEach((centro){        
+        if(GpsHelper.distancia(posicion, double.parse(centro.positionLat), double.parse(centro.positionLon))<60){       
+            asistencia.centroTrabajo=centro;          
+        }
+     });    
+     if(asistencia.centroTrabajo==null) return asistencia;
+     asistencia.idAsistencia=Asistencia.getIdAsistencia(horaCheck, idEmpleado, dispositivo.idDispositivo);
+     asistencia.fechaHoraLocal=horaCheck.toLocal().toString().substring(0,19);
+     asistencia.fechaHoraUTC=horaCheck.toUtc().toString().substring(0,19);
+     asistencia.horario=horario;     
+     return asistencia;
+  }
+
 
   static Trabajador fromJson(Map<String,dynamic> json){
       Trabajador tra=Trabajador();

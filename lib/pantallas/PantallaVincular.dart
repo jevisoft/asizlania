@@ -80,14 +80,15 @@ class PantallaVincular extends StatelessWidget{
         return;
     }
     
-     Trabajador trabajador=Trabajador.fromJson(jsonDecode(respuesta.body)); 
-     context.read<TrabajadorProvider>().setTrabajador(trabajador);
-     await BaseDatosControlador.guardaTrabajador(trabajador);
+     Trabajador trabajador=Trabajador.fromJson(jsonDecode(respuesta.body));
+     Dispositivo dispositivo=Dispositivo.fromJson(jsonDecode(respuesta.body)); 
+     
+     await BaseDatosControlador.guardaTrabajador(trabajador);     
+     await BaseDatosControlador.guardaDispositivo(dispositivo);
 
-     Dispositivo dispositivo=Dispositivo.fromJson(jsonDecode(respuesta.body));
-     await BaseDatosControlador.guardaDispositivo(dispositivo); 
-
-    // Mensajeshelper.muestraMensajeOk(context, "Dispositivo vinculado, hola ${trabajador.nombre}!");
+     context.read<TrabajadorProvider>().setTrabajador(trabajador,dispositivo);
+     ApiCas.CHECK_API_KEY="${info.id}KJ!JK${dispositivo.codigoVinculacion}"; 
+      
      Mensajeshelper.muestraMensaje(context, "Vinculado !");
      Navigator.pop(context);
   }
